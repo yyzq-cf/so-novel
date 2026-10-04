@@ -19,8 +19,12 @@ COPY bundle ./bundle
 COPY assets ./assets
 
 # 编译打包。QEMU 下 OS profile 按 TARGETPLATFORM 自动激活 javet native 库
+# -Dlaunch4j.skip: 跳过 Windows .exe 生成（launch4j 的 windres 只有 amd64 版，
+#   arm64 下会找不到二进制；Docker 里只需要 jar）
+# -DjrePath=runtime: 满足 pom 中 ${jrePath} 引用，避免 launch4j 配置解析报错
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -q clean package -Dmaven.test.skip=true
+    mvn -q clean package -Dmaven.test.skip=true \
+        -Dlaunch4j.skip=true -DjrePath=runtime
 
 # 整理产物
 RUN mkdir -p /out && \
